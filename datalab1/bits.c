@@ -186,6 +186,24 @@ int binNOU(int x, int y) {
  *   Nível: 2
  */
 int bitsPares(int x) {
+  /*
+	É utilizada uma máscara 0x55 para fazer operações & com o valor de x dado
+	e depois com os seus respectivos deslocamentos de 8 bits a mais (até >> 24) para a direita.
+	
+	Todas estas operações vão sendo guardadas na variável 'res' que irá ser reescrita
+	três vezes por um '&' entre o seu valor anterior e o '&' entre o deslocamento de x
+	a cada 8 bits e a máscara. No fim da ultima reescrita, teremos varrido todos os bits de x,
+	pois depois de deslocar o x 24 bits para a direita, estaremos realizando a operação com
+	os oito bits mais significativos de x.
+
+	Se todos os bits pares de x for 1, então o resultado ('res') é a própria máscara,
+	senão, o resultado é diferente da máscara. 
+
+	Por isso, é feito um 'xor' no fim. Se o resultado for igual à máscara,
+	então o 'xor' resultará em zero, se o resultado for diferente da máscara,
+	então o 'xor' resultará em diferente de zero. Negando essa saída, temos o
+	resultado correto.
+  */
   int res = x & 0x55;
   
   res &= 0x55 & (x >> 8);
