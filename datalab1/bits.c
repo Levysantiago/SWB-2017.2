@@ -221,7 +221,42 @@ int bitsPares(int x) {
  *   Max ops: 16
  *   Rating: 3
  */
-int mascaraBit(int alto, int baixo) {	
+int mascaraBit(int alto, int baixo) {
+  /*
+  	É gerada uma mascara 0xFFFFFFFF a partir de outra máscara 0x1.
+
+  	Depois é dado um deslocamento à esquerda da máscara de 'alto' bits seguido
+  	de outro deslocamento à esquerda de 1 bit, isso por que a contagem de bits
+  	inicia-se do 0. Esse valor é guardado em 'inicio'. 
+  	Posteriormente é dado um deslocamento na mesma máscara de 'baixo' bits, e esse
+  	valor é guardado em 'fim'.
+
+  	Por fim só é feito um 'xor' entre as duas variáveis resultantes. Porém, existe
+  	o caso de 'alto' ser menor do que 'baixo', por isso foi adicionado um '&' do
+  	resultado final com a variável fim, pois se o segundo deslocamento foi maior do
+  	que o primeiro, então o resultado de (inicio ^ fim) & fim vai ser 0x0.
+  	
+  	Exemplo:
+
+  	mascaraBit(5,3):
+  		//Obtendo a máscara
+  		m = 0000 0000 0000 0000 0000 0000 0000 0001
+  		m = << 31 => 1000 0000 0000 0000 0000 0000 0000 0000
+  		m = >> 31 => 1111 1111 1111 1111 1111 1111 1111 1111
+
+  		//Andamos até o bit '5'
+  		inicio = 			1111 1111 1111 1111 1111 1111 1100 0000 
+
+		//Andamos até o bit 2, pois a partir do bit 3, já devem aparecer os bits 1's
+  		fim = 				1111 1111 1111 1111 1111 1111 1111 1000
+  		
+  		//Operação xor entre os valores resultantes
+  		(inicio ^ fim) = 	0000 0000 0000 0000 0000 0000 0011 1000
+		
+		//Operação & com o fim
+		(inicio ^ fim) & fim = 0000 0000 0000 0000 0000 0000 0011 1000 = 0x38
+  */
+
   int m = 0x1, inicio, fim;
   m = m << 31;
   m = m >> 31;
@@ -260,7 +295,24 @@ int maiorPosicaoBit(int x) {
  *   Nível: 1
  */
 int cabeShort(int x) {
-  return 2;
+  /*
+  	A parte do número importante para se fazer a analise em questão são
+  	os 16 ultimos números. Por isso, foi feito um deslocamento à esquerda
+  	de 16 bits do número x para descartar a primeira parte do número.
+
+  	Para retornar os 16 bits menos significantes ao seu lugar, foi feito
+  	um deslocamento de 16 bits à direita. Isso deixa os primeiros bits sendo
+  	0000 0000 0000 0000 ou 1111 1111 1111 1111 e os 16 bits à direita com a metade
+  	direita de x.
+
+  	Depois é só aplicar um xor bit a bit entre o resultado final e o x. Se o
+  	resultado for diferente de 0 então o x não pode ser representado como um
+  	inteiro de 16 bits, se o resultado for 0 então ele pode ser representado.
+  */
+  int res = x << 16;
+  res = res >> 16;
+
+  return !(res ^ x);
 }
 /* 
  * sinal - retorna 1 se positivo, 0 se zero, e -1 se negativo
@@ -271,12 +323,33 @@ int cabeShort(int x) {
  *  Nível: 2
  */
 int sinal(int x) {
-    int opOff = !!x; // 1 se x != 0
+	/*
+		Primeiro guardamos a verificação se x é diferente de zero.
+
+		Depois é feito um '&' entre o x e o resultado da verificação
+		dando um deslocamento à esquerda de 31 bits, o que vai fazer
+		com que seja um '&' entre x e 0 ou x e CMIN.
+
+		Essa operação vai nos resultar em CMIN se x for negativo,
+		0 se x for positivo ou zero.
+
+		É feito um deslocamento à direita do resultado anterior de 31 bits,
+		pois se x for negativo, então o resultado anterior que era CMIN se
+		torna -1 = 0xFFFFFFFF. Se ele for positivo ou zero, o resultado
+		continua sendo zero.
+
+		No fim, basta fazer um ou entre o resultado da verificação inicial
+		e o resultado final da operação. Isso irá resolver o resultado final.
+		Se x for negativo o 'res' resulta em -1, então res | isNtZero(0xFFFFFFFF) = -1;
+		Se x for positivo o 'res' resulta em 0, então res | isNtZero(0x1) = 1;
+		Se x for zero o 'res' resulta em 0, então res | isNtZero(0x0) = 0;
+	*/
+    int isNtZero = !!x; // 1 se x != 0
     int res;
-    res = x & (opOff << 31);
+    res = x & (isNtZero << 31);
     res = res >> 31;
 
-    return res | opOff;
+    return res | isNtZero;
 }
 /* 
  * diferente - retrona 0 se x == y, e 1 caso contrário 
@@ -286,6 +359,15 @@ int sinal(int x) {
  *   Nível: 2
  */
 int diferente(int x, int y) {
+  /*
+	Se um número é igual ao outro, então se for feito um xor bit a bit entre eles,
+	resultará em 0. Senão, resultará em um número diferente de zero. Por isso,
+	para resolver este problema, foi feito um xor bit a bit entre os números x e y,
+	e depois este resultado foi negado duas vezes.
+
+	Se x ^ y == 0 então x == y então !!(x ^ y) = 0
+	Se x ^ y != 0 então x != y então !!(x ^ y) = 1
+  */
   return !!(x ^ y);
 }
 /* 
@@ -296,6 +378,19 @@ int diferente(int x, int y) {
  *   Nível: 2
  */
 int negativo(int x) {
+  /*
+  	Se o x < 0, então seu bit de sinal é 1. Se x >= 0 então seu bit de sinal é 0.
+  	Foi gerado uma máscara CMIN com deslocamento à esquerda do 0x1 de 31 bits.
+  	Depois foi realizada uma operação '&' entre x e a máscara (CMIN).
+
+  	Se x < 0 então o resultado da operação vai ser CMIN.
+  	Se x >= 0 então o resultado da operação vai ser 0.
+
+  	Negando o resultado final duas vezes temos:
+
+  	Se x < 0 então o retorno vai ser 1.
+  	Se x >= 0 então o retorno vai ser 0.
+  */
   return !!((x & (0x1 << 31)));
 }
 /* 
