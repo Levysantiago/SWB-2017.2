@@ -201,7 +201,7 @@ int bitsPares(int x) {
 
 	Por isso, é feito um 'xor' no fim. Se o resultado for igual à máscara,
 	então o 'xor' resultará em zero, se o resultado for diferente da máscara,
-	então o 'xor' resultará em diferente de zero. Negando essa saída, temos o
+	então o 'xor' resultará em diferente de zero. Negando essa saída com '!', temos o
 	resultado correto.
   */
   int res = x & 0x55;
@@ -363,7 +363,7 @@ int diferente(int x, int y) {
 	Se um número é igual ao outro, então se for feito um xor bit a bit entre eles,
 	resultará em 0. Senão, resultará em um número diferente de zero. Por isso,
 	para resolver este problema, foi feito um xor bit a bit entre os números x e y,
-	e depois este resultado foi negado duas vezes.
+	e depois este resultado foi negado duas vezes com '!'.
 
 	Se x ^ y == 0 então x == y então !!(x ^ y) = 0
 	Se x ^ y != 0 então x != y então !!(x ^ y) = 1
@@ -386,7 +386,7 @@ int negativo(int x) {
   	Se x < 0 então o resultado da operação vai ser CMIN.
   	Se x >= 0 então o resultado da operação vai ser 0.
 
-  	Negando o resultado final duas vezes temos:
+  	Negando o resultado final duas vezes com o '!' temos:
 
   	Se x < 0 então o retorno vai ser 1.
   	Se x >= 0 então o retorno vai ser 0.
